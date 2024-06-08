@@ -4,7 +4,7 @@ import sys
 def conf(args_list=None):
     parser = argparse.ArgumentParser(description="PyTorch Jigsaw Pretext")
     # model name
-    parser.add_argument("--dataset", default="FractalDB-60", type = str, help="dataset name")
+    parser.add_argument("--dataset", default="rwave-1024", type = str, help="dataset name")
     # network settings
     parser.add_argument("--usenet", default="resnet50", type = str, help="use network")
     parser.add_argument("--epochs", default=90, type = int, help="end epoch")
