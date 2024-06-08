@@ -5,7 +5,7 @@ import tarfile
 
 # Define the path to your .tar.gz file
 tar_path = '4096_split.tar.gz'
-extract_path = '/'
+extract_path = './'
 
 # Extract the tar.gz file
 with tarfile.open(tar_path, 'r:gz') as tar:
