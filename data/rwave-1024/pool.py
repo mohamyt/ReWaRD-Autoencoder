@@ -12,7 +12,7 @@ with tarfile.open(tar_path, 'r:gz') as tar:
     tar.extractall(path=extract_path)
 
 # Path to the main directory containing class folders
-main_directory = extract_path
+main_directory = 'images'
 # Path to the directory where you want to pool all images
 train_images_directory = 'train_images'
 
