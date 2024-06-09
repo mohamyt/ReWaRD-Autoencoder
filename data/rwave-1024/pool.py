@@ -15,27 +15,31 @@ os.makedirs(train_images_directory, exist_ok=True)
 with tarfile.open(tar_path, 'r:gz') as tar:
     # Get the list of all members (files) in the tar archive
     members = tar.getmembers()
-    image_members = [m for m in members if m.isfile() and m.name.endswith(('.jpg', '.jpeg', '.png'))]
+    
+    # Find all unique classes (directories) in the tar file
+    class_names = list(set(os.path.dirname(m.name) for m in members if m.isfile()))
+    
+    # Calculate the number of classes to include (95%)
+    num_classes_to_include = int(len(class_names) * 0.95)
+    
+    # Randomly select 95% of the classes
+    selected_classes = set(random.sample(class_names, num_classes_to_include))
 
-    # Calculate the number of images to include (95%)
-    num_images_to_include = int(len(image_members) * 0.95)
+    # Iterate through each member in the tar file
+    for member in members:
+        if member.isfile():
+            class_name = os.path.dirname(member.name)
+            if class_name in selected_classes:
+                # Extract the image into memory
+                extracted_file = tar.extractfile(member)
+                if extracted_file is not None:
+                    # Create a new name for the image
+                    image_name = os.path.basename(member.name)
+                    new_image_name = f"{os.path.basename(class_name)}_{image_name}"
+                    new_image_path = os.path.join(train_images_directory, new_image_name)
+                    
+                    # Write the image directly to the new path
+                    with open(new_image_path, 'wb') as out_file:
+                        shutil.copyfileobj(extracted_file, out_file)
 
-    # Randomly select 95% of the images
-    selected_image_members = random.sample(image_members, num_images_to_include)
-
-    # Extract and rename the selected images
-    for member in selected_image_members:
-        # Extract the image into memory
-        extracted_file = tar.extractfile(member)
-        if extracted_file is not None:
-            # Create a new name for the image
-            class_name = os.path.basename(os.path.dirname(member.name))
-            image_name = os.path.basename(member.name)
-            new_image_name = f"{class_name}_{image_name}"
-            new_image_path = os.path.join(train_images_directory, new_image_name)
-            
-            # Write the image directly to the new path
-            with open(new_image_path, 'wb') as out_file:
-                shutil.copyfileobj(extracted_file, out_file)
-
-print("Selected images have been extracted, copied, and renamed successfully.")
+print("Selected classes have been extracted, copied, and renamed successfully.")
