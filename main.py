@@ -1,38 +1,40 @@
-import datetime
 import os
 import random
 import time
-import sys
+from datetime import datetime
 from tqdm import tqdm
 
 import torch
-import torchvision
 import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
-import torchvision.models as models
-import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 
 from args import conf
-from DataLoader import Dataset_
 from Autoencoder import *
 
-if __name__== "__main__":
 
-    # Processing time
-    starttime = time.time()
-    
+if __name__ == "__main__":
     # Option
     args = conf()
     print(args)
+
+    if args.lmdb:
+        from DataLoaderLMDB import Dataset_
+    else:
+        from DataLoader import Dataset_
+    
+    # Processing time
+    starttime = time.time()
+    today = datetime.now()
+    weight_folder = "/" + today.strftime('%Y%m%d') + str(today.hour) + str(today.minute)
 
     # GPUs
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
     
-    #to deterministic
+    # to deterministic
     cudnn.deterministic = True
     random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -40,13 +42,14 @@ if __name__== "__main__":
     # Training settings
     train_transform = transforms.Compose([transforms.RandomCrop((args.crop_size, args.crop_size)),
                                           transforms.ToTensor()])
+
     train_dataset = Dataset_(args.path2traindb, transform=train_transform)
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
     
     if args.val:
         val_transform = transforms.Compose([transforms.RandomCrop((args.crop_size, args.crop_size)),
                                             transforms.ToTensor()])
-        val_dataset = Dataset_(args.path2valdb, transform=train_transform)
+        val_dataset = Dataset_(args.path2valdb, transform=val_transform)
         val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
 
     # Model & optimizer
@@ -77,7 +80,7 @@ if __name__== "__main__":
     if not args.no_multigpu:
         model = nn.DataParallel(model)
 
-    if not 'train_losses' in locals(): #Resume on existing data if available
+    if not 'train_losses' in locals():  # Resume on existing data if available
         train_losses = []
         batch_losses = []
 
@@ -115,7 +118,8 @@ if __name__== "__main__":
         train_losses.append(epoch_loss)
 
         if (epoch + 1) % args.save_interval == 0:
-            checkpoint_filename = f"checkpoint_epoch_{epoch+1}.pth.tar"
+            os.makedirs(f"./data/weight/{args.usenet}" + weight_folder, exist_ok=True)
+            checkpoint_filename = f"./data/weight/{args.usenet}{weight_folder}/checkpoint_epoch_{epoch+1}.pth.tar"
             save_checkpoint({
                 'epoch': epoch + args.start_epoch,
                 'state_dict': model.state_dict(),
@@ -125,6 +129,10 @@ if __name__== "__main__":
             }, checkpoint_filename)
             print(f"Model checkpoint saved at epoch {epoch+1}")
         print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {epoch_loss:.4f}")
+        # Processing time
+        endtime = time.time()
+        interval = endtime - starttime
+        print("elapsed time = {0:d}h {1:d}m {2:d}s".format(int(interval / 3600), int((interval % 3600) / 60), int((interval % 3600) % 60)))
         # Clear unused memory
         torch.cuda.empty_cache()
 
@@ -132,4 +140,4 @@ if __name__== "__main__":
     # Processing time
     endtime = time.time()
     interval = endtime - starttime
-    print("elapsed time = {0:d}h {1:d}m {2:d}s".format(int(interval/3600), int((interval%3600)/60), int((interval%3600)%60)))
+    print("elapsed time = {0:d}h {1:d}m {2:d}s".format(int(interval / 3600), int((interval % 3600) / 60), int((interval % 3600) % 60)))

@@ -1,11 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torchvision import transforms
-from torch.utils.data import DataLoader, Dataset
-import numpy as np
-import matplotlib.pyplot as plt
-from PIL import Image
 
 from args import conf
 from alex import bn_alexnet

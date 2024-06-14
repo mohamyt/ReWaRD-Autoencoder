@@ -6,7 +6,6 @@ import itertools
 import os
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 
 class Dataset_(Dataset):
     def __init__(self, image_dir, transform=None):
