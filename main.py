@@ -55,7 +55,7 @@ if __name__ == "__main__":
     # Model & optimizer
     model = Network(args)
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
-    criterion = nn.MSELoss().to(device)
+    criterion = nn.CrossEntropyLoss().to(device)
     
     # optionally resume from a checkpoint
     if args.resume:
