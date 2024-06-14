@@ -15,7 +15,7 @@ def conf(args_list=None):
     parser.add_argument("--weight_decay", default=1e-4, type = float, help="weight decay")
     # etc
     parser.add_argument("--start-epoch", default=1, type = int, help="input batch size for training")
-    parser.add_argument("--batch_size", default=64, type = int, help="input batch size for training")
+    parser.add_argument("--batch_size", default=128, type = int, help="input batch size for training")
     parser.add_argument("--val-batch_size", default=256, type=int, help="input batch size for testing")
     parser.add_argument("--img_size", default=256, type = int, help="image size")
     parser.add_argument("--crop_size", default=256, type = int, help="crop size")
@@ -23,7 +23,7 @@ def conf(args_list=None):
     parser.add_argument("--no-cuda", default=False, action="store_true", help="disables CUDA training")
     parser.add_argument("--gpu_id", default=-1, type = int, help="gpu id")
     parser.add_argument("--num_workers", default=8, type = int, help="num of workers (data_loader)")
-    parser.add_argument("--save-interval", default=1, type = int, help="save every N epoch")
+    parser.add_argument("--save-interval", default=3, type = int, help="save every N epoch")
     parser.add_argument("--log-interval", default=100, type=int, help="how many batches to wait before logging training status")
     parser.add_argument("--seed", default=1, type=int, help="seed")
     parser.add_argument('--lmdb', default=True, action='store_true', help='If true, training database is an lmdb file.')
